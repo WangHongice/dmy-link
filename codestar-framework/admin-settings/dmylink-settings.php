@@ -25,7 +25,7 @@ if( class_exists( 'CSF' ) ) {
         'menu_title'     => '外链跳转插件',
         'framework_title'=> '大绵羊外链跳转插件',
         'menu_slug'      => 'dmy_link_settings',
-        'footer_text'    => '作者：大绵羊&天无神话 | 作者网站<a href="https://dmyblog.cn">大绵羊博客</a> | 版本:V1.3.4 | <i class="fa fa-fw fa-heart-o" aria-hidden="true"></i> 感谢您使用大绵羊外链跳转插件。',
+        'footer_text'    => '作者：大绵羊&天无神话 | 作者网站<a href="https://dmyblog.cn">大绵羊博客</a> | 版本:V1.3.7 | <i class="fa fa-fw fa-heart-o" aria-hidden="true"></i> 感谢您使用大绵羊外链跳转插件。',
     );
 
     // 子比主题，启用 light 主题
@@ -152,25 +152,42 @@ if( class_exists( 'CSF' ) ) {
                     'aes_encryption' => 'AES加密 + 后端验证',
                 ),
                 'default' => 'random_string',
-                'desc' => '选择链接验证的安全机制'
+                'desc' => '选择链接验证的安全机制<br/><strong>随机字符串</strong>：生成随机令牌，可设置过期时间，适合短期跳转<br/><strong>AES加密</strong>：使用AES-256-CBC加密，永久有效，适合长期链接'
             ),
             array(
                 'id'    => 'dmy_link_expiration',
-                'type'  => 'number',
+                'type' => 'number',
                 'title' => '过期时间（分钟）',
-                'desc'  => '设置外链跳转链接的过期时间，单位为分钟<br/>默认为5分钟',
+                'desc' => '设置外链跳转链接的过期时间，单位为分钟<br/>默认为5分钟<br/><strong>仅适用于随机字符串模式</strong>',
                 'default' => 5,
                 'min' => 1,
                 'max' => 1440,
                 'dependency' => array('dmy_link_verification_method', '==', 'random_string'),
             ),
             array(
+                'id'    => 'dmy_link_countdown_seconds',
+                'type' => 'number',
+                'title' => '自动跳转秒数',
+                'desc' => '设置跳转页面的自动跳转秒数，默认为5秒<br/><strong>仅适用于随机字符串模式</strong>',
+                'default' => 5,
+                'min' => 1,
+                'max' => 60,
+            ),
+            array(
                 'id'    => 'dmy_link_aes_key',
-                'type'  => 'text',
+                'type' => 'text',
                 'title' => 'AES加密密钥',
-                'desc'  => '请输入32个字符的密钥（用于加密跳转链接）',
+                'desc' => '请输入32个字符的密钥（用于加密跳转链接）<br/><strong>仅适用于AES加密模式</strong>',
                 'default' => bin2hex(openssl_random_pseudo_bytes(16)), // 生成32字符随机密钥
                 'dependency' => array('dmy_link_verification_method', '==', 'aes_encryption'),
+            ),
+            array(
+                'id'    => 'dmy_link_require_click',
+                'type' => 'switcher',
+                'title' => '要求手动点击',
+                'desc' => '用户必须手动点击"继续访问"按钮才能跳转<br/><strong>仅适用于随机字符串模式</strong>',
+                'default' => false,
+                'dependency' => array('dmy_link_verification_method', '==', 'random_string'),
             ),
         ),
     ));

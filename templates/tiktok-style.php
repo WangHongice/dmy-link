@@ -21,9 +21,44 @@
   <div class="dmy-tiktok-button-group dmy-tiktok-button-open-anyway-group">
     <div class="dmy-tiktok-button-open-link">
       <a href="<?php echo esc_url($link); ?>" target="_self"
-        style="font-family:'Tiktok Text'; font-size:18px; color:#161823; font-weight:600; line-height:25px;">
+        style="font-family:'TikTok Text'; font-size:18px; color:#161823; font-weight:600; line-height:25px;">
         点击跳转
       </a>
     </div>
+    <div class="dmylink-countdown">
+      <span id="dmylink-countdown-text"><?php echo esc_html($countdown_seconds); ?></span>秒后自动跳转
+    </div>
   </div>
+  <script>
+    var countdown = <?php echo intval($countdown_seconds); ?>;
+    var countdownElement = document.getElementById('dmylink-countdown-text');
+    var targetUrl = '<?php echo esc_js(esc_url($link)); ?>';
+    var requireClick = <?php echo $require_click ? 'true' : 'false'; ?>;
+    var continueButton = document.querySelector('.dmy-tiktok-button-open-link');
+    
+    function updateCountdown() {
+      if (countdown > 0) {
+        countdownElement.textContent = countdown;
+        countdown--;
+        setTimeout(updateCountdown, 1000);
+      } else {
+        countdownElement.textContent = '正在跳转...';
+        if (!requireClick) {
+          setTimeout(function() {
+            window.location.href = targetUrl;
+          }, 500);
+        } else {
+          countdownElement.textContent = '请点击"点击跳转"';
+        }
+      }
+    }
+    
+    updateCountdown();
+    
+    if (continueButton && requireClick) {
+      continueButton.addEventListener('click', function() {
+        window.location.href = targetUrl;
+      });
+    }
+  </script>
 </div>

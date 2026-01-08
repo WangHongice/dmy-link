@@ -3,15 +3,24 @@
  * 大绵羊外链跳转模板
  * 
  * 安全加载跳转页面模板，包含错误处理和缓存机制
+ * 
+ * 功能说明：
+ * - 支持多种跳转页面风格（默认、Bilibili、腾讯、CSDN、知乎、Jump、TikTok、模型）
+ * - 自动加载对应的CSS样式文件
+ * - 支持自定义Logo显示
+ * - 提供头部模板fallback机制
+ * - 包含错误处理和日志记录
+ * 
+ * @package DMY_LINK_URL
  */
 
-// 缓存设置数据
+// 缓存设置数据，避免重复查询数据库
 static $settings = null;
 if ($settings === null) {
     $settings = get_option('dmy_link_settings');
 }
 
-// 获取风格标识
+// 获取风格标识，默认为default风格
 static $style = null;
 if ($style === null) {
     $style = isset($settings['dmy_link_style']) ? 
@@ -19,7 +28,7 @@ if ($style === null) {
              'dmylink-default';
 }
 
-// 定义风格模板映射
+// 定义风格模板映射，关联风格名称到对应的模板文件
 define('DMYLINK_TEMPLATES', [
     'dmylink-bilibili' => 'bilibili-style.php',
     'dmylink-tencent'  => 'tencent-style.php',
@@ -30,6 +39,18 @@ define('DMYLINK_TEMPLATES', [
     'dmylink-moxing'   => 'moxing-style.php',
     'dmylink-tiktok'   => 'tiktok-style.php'
 ]);
+
+// 获取倒计时秒数
+$countdown_seconds = isset($settings['dmy_link_countdown_seconds']) ? 
+                     intval($settings['dmy_link_countdown_seconds']) : 5;
+
+// 获取显示目标URL设置
+$show_target_url = isset($settings['dmy_link_show_target_url']) ? 
+                     (bool)$settings['dmy_link_show_target_url'] : false;
+
+// 获取要求手动点击设置
+$require_click = isset($settings['dmy_link_require_click']) ? 
+                   (bool)$settings['dmy_link_require_click'] : false;
 
 // 确保样式表加载
 $css_file = plugin_dir_path(__FILE__) . 'css/' . $style . '.css';
@@ -65,14 +86,12 @@ $template_file = isset(DMYLINK_TEMPLATES[$style]) ?
 // 安全加载内容模板
 $template_path = plugin_dir_path(__FILE__) . 'templates/' . $template_file;
 if (file_exists($template_path)) {
-    // 添加模板加载调试信息
-    if (WP_DEBUG) {
+    if (WP_DEBUG && WP_DEBUG_LOG) {
         error_log('Loading template: ' . $template_path);
     }
     include_once $template_path;
 } else {
-    // 模板缺失的fallback处理
-    if (WP_DEBUG) {
+    if (WP_DEBUG && WP_DEBUG_LOG) {
         error_log('Template not found: ' . $template_path);
     }
     echo '<div class="alert alert-warning">';
